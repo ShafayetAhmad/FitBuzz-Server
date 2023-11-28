@@ -27,8 +27,19 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
-    const fitBuzzDB = client.db("FitBuzz");
+    const fitBuzzDB = client.db("fitBuzzDB");
     const classesCollection = fitBuzzDB.collection("classesCollection");
+
+    app.get("/getFeaturedClasses", async (req, res) => {
+      const result = await classesCollection
+        .find({})
+        .sort({ enrolled: -1 })
+        .limit(6)
+        .toArray();
+      console.log(result);
+
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
