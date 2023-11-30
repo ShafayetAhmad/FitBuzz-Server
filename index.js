@@ -12,9 +12,9 @@ app.use(
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const uri = `mongodb+srv://shafayetahmad1:1wiZf7sw9VXdSg4b@cluster0.dawr9mq.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://shafayetahmad1:1wiZf7sw9VXdSg4b@cluster0.dawr9mq.mongodb.net/?retryWrites=true&w=majority`;
 
-// const uri = `mongodb://localhost:27017`;
+const uri = `mongodb://localhost:27017`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -28,9 +28,9 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
     // Send a ping to confirm a successful connection
-    // await client.db("admin").command({ ping: 1 });
+    await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
@@ -113,6 +113,17 @@ async function run() {
       const result = await usersCollection.insertOne(userDetails);
       res.send(result);
     });
+
+    app.post("/add-trainer", async (req, res) => {
+      const trainerFolio = req.body.trainerFolio;
+      // console.log(trainerFolio);
+      const result = await trainersCollection.insertOne(trainerFolio);
+      console.log(result);
+      if (!result.insertedId) {
+        res.status(401).send("not inserted");
+      }
+      res.status(200).send("inserted");
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -125,8 +136,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/gethello2", (req, res) => {
-  res.send("2 hello")
-})
+  res.send("2 hello");
+});
 
 app.listen(port, () => {
   console.log(`listening at port ${port}`);
