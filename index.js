@@ -45,6 +45,7 @@ async function run() {
     const premiumMemberCollection = fitBuzzDB.collection(
       "premiumMemberCollection"
     );
+    const paymentCollection = fitBuzzDB.collection("paymentCollection");
 
     app.get("/getFeaturedClasses", async (req, res) => {
       const result = await classesCollection
@@ -380,7 +381,32 @@ async function run() {
 
     app.post("/add-premium-member", async (req, res) => {
       const memberData = req.body.premiumMember;
-      console.log(memberData);
+      const result = await premiumMemberCollection.insertOne(memberData);
+      res.send(result);
+    });
+
+    app.get("/get-premium-member-payment-data", async (req, res) => {
+      const userEmail = req.query.email;
+      const result = await premiumMemberCollection.findOne({
+        memberEmail: userEmail,
+      });
+      res.send(result);
+    });
+    app.get("/getTrainerEmail", async (req, res) => {
+      const id = req.query.id;
+      // console.log(id);
+      const result = await trainersCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      console.log(result.full_name);
+      res.send(result.full_name);
+    });
+    app.post("/payment-from-booked-user", async (req, res) => {
+      const paymentData = req.body.paymentData;
+      console.log(paymentData);
+      const result = await paymentCollection.insertOne(paymentData);
+      console.log(paymentData);
+      res.send(result);
     });
   } finally {
     // Ensures that the client will close when you finish/error
