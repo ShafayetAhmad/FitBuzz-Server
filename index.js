@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 5000;
+const moment = require("moment");
 require("dotenv").config();
 app.use(
   cors({
@@ -131,6 +132,7 @@ async function run() {
           return;
         }
       }
+      trainerFolio.joinData = moment().toString();
       // console.log(trainerFolio);
       const result = await trainersCollection.insertOne(trainerFolio);
       // console.log(result);
@@ -192,9 +194,16 @@ async function run() {
     });
     app.post("/add-subscriber", async (req, res) => {
       const subscriber = req.body.subscriber;
+      const check = await subsCollection
+        .find({ email: subscriber.email })
+        .toArray();
+      if (check.length) {
+        res.send("You Are Already Subscribed!");
+        return;
+      }
       const result = await subsCollection.insertOne(subscriber);
       // console.log(result);
-      res.send("hi");
+      res.send("Thank You for Subscribing");
     });
 
     app.get("/get-subs-data", async (req, res) => {
@@ -333,6 +342,9 @@ run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("hello");
+  const startDate = "Sun Jan 03 2023 11:45:31 GMT+0530";
+  console.log(moment().toString());
+  console.log(moment().diff(startDate, "month"));
 });
 
 app.get("/gethello2", (req, res) => {
