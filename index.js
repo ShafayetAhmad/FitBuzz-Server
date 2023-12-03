@@ -133,6 +133,7 @@ async function run() {
         }
       }
       trainerFolio.joinData = moment().toString();
+      trainerFolio.totalPaid = 0;
       // console.log(trainerFolio);
       const result = await trainersCollection.insertOne(trainerFolio);
       // console.log(result);
@@ -313,12 +314,28 @@ async function run() {
     });
 
     app.get("/get-slots-for-trainer", async (req, res) => {
-      const email = req.query.email;
-      const result = await slotsCollection
-        .find({ trainerEmail: email })
-        .toArray();
-      res.send(result);
+      try {
+        const email = req.query.email;
+        const allSlots = await slotsCollection
+          .find({ trainerEmail: email })
+          .toArray();
+
+        const bookedUserEmails = allSlots
+          .filter((slot) => slot.bookedUserEmail)
+          .map((slot) => slot.bookedUserEmail);
+
+        const bookedUsers = await usersCollection
+          .find({ userEmail: { $in: bookedUserEmails } })
+          .toArray();
+
+        const result = { allSlots, bookedUsers };
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
+
     app.post("/bookSlot", async (req, res) => {
       const bookedUserEmail = req.body.userEmail;
       const slotId = req.body.slotId;
@@ -332,6 +349,30 @@ async function run() {
         }
       );
       console.log(result);
+    });
+    app.get("/get-user-activity", async (req, res) => {
+      const email = req.query.email;
+      const today = moment().format("dddd");
+      const days = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
+      console.log(today);
+      const allSlots = await slotsCollection
+        .find({ bookedUserEmail: email })
+        .toArray();
+      console.log(allSlots);
+      const filteredSlots = allSlots.filter((slot) => {
+        return today === days[slot.day];
+      });
+      console.log(filteredSlots);
+
+      res.send({ allSlots, filteredSlots });
     });
   } finally {
     // Ensures that the client will close when you finish/error
