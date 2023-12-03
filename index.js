@@ -42,6 +42,9 @@ async function run() {
     const usersCollection = fitBuzzDB.collection("usersCollection");
     const subsCollection = fitBuzzDB.collection("subsCollection");
     const slotsCollection = fitBuzzDB.collection("slotsCollection");
+    const premiumMemberCollection = fitBuzzDB.collection(
+      "premiumMemberCollection"
+    );
 
     app.get("/getFeaturedClasses", async (req, res) => {
       const result = await classesCollection
@@ -373,6 +376,11 @@ async function run() {
       console.log(filteredSlots);
 
       res.send({ allSlots, filteredSlots });
+    });
+
+    app.post("/add-premium-member", async (req, res) => {
+      const memberData = req.body.premiumMember;
+      console.log(memberData);
     });
   } finally {
     // Ensures that the client will close when you finish/error
