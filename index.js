@@ -216,6 +216,20 @@ async function run() {
       // console.log(subscribers);
       res.send(subscribers);
     });
+
+    app.get("reject-trainer", async (req, res) => {
+      const trainerEmail = req.query.email;
+      const result = await trainersCollection.updateOne(
+        { email: trainerEmail },
+        {
+          $set: {
+            trainerStatus: "rejected",
+          },
+        }
+      );
+      res.send(result);
+    });
+
     app.get("/getTrainerRequests", async (req, res) => {
       const trainerRequests = await trainersCollection
         .find({
@@ -385,6 +399,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/get-premium-member-data", async (req, res) => {
+      const result = await premiumMemberCollection.find({}).toArray();
+      res.send(result);
+    });
+
     app.get("/get-premium-member-payment-data", async (req, res) => {
       const userEmail = req.query.email;
       const result = await premiumMemberCollection.findOne({
@@ -400,6 +419,11 @@ async function run() {
       });
       console.log(result.full_name);
       res.send(result.full_name);
+    });
+    app.post("/add-forum", async (req, res) => {
+      const forumData = req.body.forumData;
+      const result = await blogsCollection.insertOne(forumData);
+      res.send(result);
     });
     app.post("/payment-from-booked-user", async (req, res) => {
       const paymentData = req.body.paymentData;
