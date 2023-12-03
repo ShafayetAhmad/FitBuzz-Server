@@ -408,6 +408,31 @@ async function run() {
       console.log(paymentData);
       res.send(result);
     });
+    app.post("/upvotePost", async (req, res) => {
+      const postId = req.query.postId;
+      console.log(postId);
+      const result = await blogsCollection.updateOne(
+        { _id: new ObjectId(postId) },
+        {
+          $inc: {
+            upvote: 1,
+          },
+        }
+      );
+      res.send(result);
+    });
+    app.post("/downvotePost", async (req, res) => {
+      const postId = req.query.postId;
+      const result = await blogsCollection.updateOne(
+        { _id: new ObjectId(postId) },
+        {
+          $inc: {
+            downvote: 1,
+          },
+        }
+      );
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
