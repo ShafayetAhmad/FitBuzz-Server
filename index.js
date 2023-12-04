@@ -13,9 +13,9 @@ app.use(
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dawr9mq.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.dawr9mq.mongodb.net/?retryWrites=true&w=majority`;
 
-// const uri = `mongodb://localhost:27017`;
+const uri = `mongodb://localhost:27017`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -48,13 +48,24 @@ async function run() {
     const paymentCollection = fitBuzzDB.collection("paymentCollection");
 
     app.get("/getFeaturedClasses", async (req, res) => {
-      const result = await classesCollection
-        .find({})
-        .sort({ enrolled: -1 })
-        .limit(6)
-        .toArray();
+      // const result = await classesCollection
+      //   .find({})
+      //   .sort({ enrolled: -1 })
+      //   .limit(6)
+      //   .toArray();
+      const allClasses = await slotsCollection.find({}).toArray();
+      const trainerNamesSet = new Set();
+      const uniqueTrainers = [];
+      for (const obj of allClasses) {
+        if (!trainerNamesSet.has(obj.trainerName)) {
+          trainerNamesSet.add(obj.trainerName);
+          uniqueTrainers.push(obj);
+        }
+        if (uniqueTrainers.length == 6) break;
+      }
 
-      res.send(result);
+      console.log(uniqueTrainers);
+      res.send(uniqueTrainers);
     });
     app.get("/getAllClasses", async (req, res) => {
       // const result = await classesCollection.find({}).toArray();
@@ -62,6 +73,7 @@ async function run() {
 
       res.send(result);
     });
+
     app.get("/getAllBlogs", async (req, res) => {
       const result = await blogsCollection.find({}).toArray();
 
